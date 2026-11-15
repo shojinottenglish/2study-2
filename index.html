@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>黒トイプードルの英単語マッチング大作戦！（全ステージ50問テスト）</title>
+<style>
+  * {
+    box-sizing: border-box;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    margin: 0;
+    padding: 0;
+    background: #1e1b4b;
+    color: #f8fafc;
+    font-family: "UD デジタル 教科書体 NK-R", "Hiragino Maru Gothic ProN", "Meiryo", sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+  #hud {
+    width: 100%;
+    max-width: 820px;
+    background: linear-gradient(90deg, #312e81, #1e3a8a);
+    border-bottom: 2px solid #6366f1;
+    padding: 8px 12px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.88rem;
+    font-weight: bold;
+    z-index: 10;
+  }
+  .hud-item {
+    background: rgba(15, 23, 42, 0.55);
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+  }
+  #holding-bar {
+    width: 100%;
+    max-width: 820px;
+    background: #0f172a;
+    padding: 6px 14px;
+    text-align: center;
+    font-size: 0.94rem;
+    border-bottom: 1px solid #334155;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+  }
+  #holding-word {
+    color: #fde047;
+    font-weight: bold;
+    font-size: 1.05rem;
+  }
+  #game-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 820px;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 6px;
+  }
+  canvas {
+    background: #14532d;
+    border: 3px solid #86efac;
+    border-radius: 14px;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55);
+    touch-action: none;
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    transition: border-color 0.3s;
+  }
+  canvas.last-five {
+    border-color: #ef4444;
+    box-shadow: 0 0 26px rgba(239, 68, 68, 0.6);
+  }
+  .overlay {
+    position: absolute;
+    inset: 6px;
+    background: rgba(15, 23, 42, 0.94);
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+    text-align: center;
+    z-index: 20;
+    overflow-y: auto;
+  }
+  .overlay.hidden {
+    display: none;
+  }
+  h1 {
+    margin: 0 0 8px;
+    font-size: 1.38rem;
+    color: #fde047;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.6);
+  }
+  .sub {
+    font-size: 0.85rem;
+    color: #cbd5e1;
+    line-height: 1.5;
+    margin-bottom: 10px;
+    max-width: 580px;
+  }
+  .opt-group {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 10px;
+    max-width: 660px;
+  }
+  .opt-btn {
+    background: #334155;
+    color: #f8fafc;
+    border: 2px solid #64748b;
+    border-radius: 999px;
+    padding: 5px 12px;
+    font-size: 0.82rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .opt-btn.highlight {
+    border-color: #f59e0b;
+  }
+  .opt-btn.active {
+    background: #2563eb;
+    border-color: #93c5fd;
+    color: #fff;
+  }
+  .start-btn {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #1e293b;
+    border: none;
+    border-radius: 999px;
+    padding: 12px 34px;
+    font-size: 1.12rem;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #92400e;
+    margin-top: 4px;
+  }
+  .start-btn:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 #92400e;
+  }
+  #miss-box {
+    max-height: 140px;
+    overflow-y: auto;
+    background: #1e293b;
+    border: 1px solid #475569;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin: 10px 0;
+    font-size: 0.85rem;
+    text-align: left;
+    width: 100%;
+    max-width: 460px;
+  }
+</style>
+</head>
+<body>
+
+<div id="hud">
+  <div class="hud-item">🐩 ライフ: <span id="hud-life">❤️❤️❤️</span></div>
+  <div class="hud-item">💖 復活まで: <span id="hud-heal" style="color:#f472b6;">0 / 5</span></div>
+  <div class="hud-item">✨ クリア: <span id="hud-cleared" style="color:#4ade80;">0</span> / <span id="hud-total">50</span></div>
+  <div class="hud-item">🏆 スコア: <span id="hud-score" style="color:#fde047;">0</span></div>
+</div>
+
+<div id="holding-bar">
+  <span>🐾 キャッチ中：</span>
+  <span id="holding-word">（まだ持っていません — 青い英単語に触れよう！）</span>
+</div>
+
+<div id="game-wrap">
+  <canvas id="gameCanvas" width="800" height="540"></canvas>
+
+  <!-- スタート画面 -->
+  <div class="overlay" id="startOverlay">
+    <h1>🐩 黒トイプードルの英単語マッチング大作戦！</h1>
+    <p class="sub">
+      NEW CROWN 2（Lesson 4〜6）全範囲の新出単語・熟語 <b>全154語</b> 収録！<br>
+      ① 画面に並ぶ<b>8組の英単語と日本語</b>を黒トイプードルでマッチングしよう！<br>
+      ② 別の英単語に触れたら持ち替えになるだけ！<b>違う日本語に触れるとライフ -1</b>！<br>
+      ③ <b>5個正解でライフ1つ復活💖</b>！<b>ラスト5問はスピードアップ＆ボス出現👑</b><br>
+      <span style="color:#93c5fd; font-size:0.8rem;">操作：矢印キー(↑↓←→) / WASD / 画面タップ＆ドラッグ</span>
+    </p>
+
+    <div style="font-size:0.8rem; color:#fde047; margin-bottom:4px; font-weight:bold;">▼ 出題コースを選択</div>
+    <div class="opt-group" id="lessonGroup">
+      <button class="opt-btn highlight active" onclick="selectLesson('test50', this)">🔥 全ステージ50問テスト（重複なし）</button>
+      <button class="opt-btn" onclick="selectLesson('random25', this)">L4〜6 ランダム (25問)</button>
+      <button class="opt-btn" onclick="selectLesson('all154', this)">L4〜6 全154問制覇！</button>
+      <button class="opt-btn" onclick="selectLesson('L4', this)">Lesson 4 すべて (78問)</button>
+      <button class="opt-btn" onclick="selectLesson('L5', this)">Lesson 5 すべて (50問)</button>
+      <button class="opt-btn" onclick="selectLesson('L6', this)">Lesson 6 すべて (26問)</button>
+    </div>
+
+    <div style="font-size:0.8rem; color:#fde047; margin-bottom:4px; font-weight:bold;">▼ お化けのスピード</div>
+    <div class="opt-group" id="speedGroup">
+      <button class="opt-btn active" onclick="selectGhostSpeed(1.15, this)">ゆっくり</button>
+      <button class="opt-btn" onclick="selectGhostSpeed(1.65, this)">ふつう</button>
+      <button class="opt-btn" onclick="selectGhostSpeed(2.2, this)">はやい</button>
+    </div>
+
+    <button class="start-btn" onclick="startGame()">テストスタート！</button>
+  </div>
+
+  <!-- リザルト画面 -->
+  <div class="overlay hidden" id="endOverlay">
+    <h1 id="endTitle">ゲームクリア！</h1>
+    <p class="sub" id="endMsg" style="margin-bottom:6px;"></p>
+    <div id="miss-box" class="hidden"></div>
+    <button class="start-btn" onclick="showStartScreen()">もう一度あそぶ</button>
+  </div>
+</div>
+
+<script>
+// ==========================================
+// NEW CROWN 2 (Lesson 4〜6) 全154語・熟語データ（重複なし）
+// ==========================================
+const WORD_DATA = [
+  // --- Lesson 4 (78語) ---
+  { lesson: "L4", en: "there is / there's", jp: "〜がある、〜がいる" },
+  { lesson: "L4", en: "store", jp: "店" },
+  { lesson: "L4", en: "post", jp: "郵便" },
+  { lesson: "L4", en: "department", jp: "売り場、部門" },
+  { lesson: "L4", en: "department store", jp: "デパート" },
+  { lesson: "L4", en: "office", jp: "事務所、局" },
+  { lesson: "L4", en: "post office", jp: "郵便局" },
+  { lesson: "L4", en: "chart", jp: "図、グラフ" },
+  { lesson: "L4", en: "pie chart", jp: "円グラフ" },
+  { lesson: "L4", en: "billion", jp: "10億" },
+  { lesson: "L4", en: "drinking", jp: "飲むこと、飲料用の" },
+  { lesson: "L4", en: "drinking water", jp: "飲み水" },
+  { lesson: "L4", en: "than", jp: "〜よりも" },
+  { lesson: "L4", en: "more than ...", jp: "〜より多くの" },
+  { lesson: "L4", en: "dirty", jp: "汚れた、きたない" },
+  { lesson: "L4", en: "directly", jp: "直接に" },
+  { lesson: "L4", en: "pond", jp: "池" },
+  { lesson: "L4", en: "should", jp: "〜すべきである" },
+  { lesson: "L4", en: "presentation", jp: "発表" },
+  { lesson: "L4", en: "laundry", jp: "洗濯" },
+  { lesson: "L4", en: "do the laundry", jp: "洗濯をする" },
+  { lesson: "L4", en: "tap", jp: "蛇口" },
+  { lesson: "L4", en: "available", jp: "利用できる" },
+  { lesson: "L4", en: "everywhere", jp: "どこでも" },
+  { lesson: "L4", en: "million", jp: "100万" },
+  { lesson: "L4", en: "imagine", jp: "〜を想像する" },
+  { lesson: "L4", en: "understand", jp: "〜を理解する" },
+  { lesson: "L4", en: "importance", jp: "重要性" },
+  { lesson: "L4", en: "step", jp: "一歩、段階" },
+  { lesson: "L4", en: "situation", jp: "状況、事態" },
+  { lesson: "L4", en: "slide", jp: "スライド" },
+  { lesson: "L4", en: "graph", jp: "グラフ" },
+  { lesson: "L4", en: "already", jp: "すでに、もう" },
+  { lesson: "L4", en: "note", jp: "メモ、覚え書き" },
+  { lesson: "L4", en: "take notes", jp: "メモをとる" },
+  { lesson: "L4", en: "save", jp: "〜を救う、節約する" },
+  { lesson: "L4", en: "earth", jp: "地球" },
+  { lesson: "L4", en: "recycle", jp: "〜をリサイクルする" },
+  { lesson: "L4", en: "electronic", jp: "電子の" },
+  { lesson: "L4", en: "goods", jp: "製品、商品" },
+  { lesson: "L4", en: "reuse", jp: "〜を再利用する" },
+  { lesson: "L4", en: "reduce", jp: "〜を減らす" },
+  { lesson: "L4", en: "eco-friendly", jp: "環境にやさしい" },
+  { lesson: "L4", en: "product", jp: "製品、産物" },
+  { lesson: "L4", en: "air", jp: "空気" },
+  { lesson: "L4", en: "air conditioner", jp: "エアコン" },
+  { lesson: "L4", en: "handout", jp: "配布プリント" },
+  { lesson: "L4", en: "even if ...", jp: "たとえ〜だとしても" },
+  { lesson: "L4", en: "blank", jp: "白紙の、空白の" },
+  { lesson: "L4", en: "side", jp: "面、側" },
+  { lesson: "L4", en: "both", jp: "両方の" },
+  { lesson: "L4", en: "paper", jp: "紙" },
+  { lesson: "L4", en: "environmental", jp: "環境の" },
+  { lesson: "L4", en: "issue", jp: "問題（点）" },
+  { lesson: "L4", en: "pollution", jp: "汚染" },
+  { lesson: "L4", en: "climate", jp: "気候" },
+  { lesson: "L4", en: "climate change", jp: "気候変動" },
+  { lesson: "L4", en: "donate", jp: "〜を寄付する" },
+  { lesson: "L4", en: "global warming", jp: "地球温暖化" },
+  { lesson: "L4", en: "spoon", jp: "スプーン" },
+  { lesson: "L4", en: "level", jp: "水平、水位、高さ" },
+  { lesson: "L4", en: "rise", jp: "上昇" },
+  { lesson: "L4", en: "member", jp: "一員、会員" },
+  { lesson: "L4", en: "fountain pen", jp: "万年筆" },
+  { lesson: "L4", en: "typewriter", jp: "タイプライター" },
+  { lesson: "L4", en: "correct", jp: "〜を訂正する" },
+  { lesson: "L4", en: "celebrate", jp: "〜を祝う" },
+  { lesson: "L4", en: "anniversary", jp: "記念日、〜周年" },
+  { lesson: "L4", en: "city hall", jp: "市民ホール、市役所" },
+  { lesson: "L4", en: "get in touch with", jp: "〜と連絡を取る" },
+  { lesson: "L4", en: "canoe", jp: "カヌー" },
+  { lesson: "L4", en: "forget", jp: "〜を忘れる" },
+  { lesson: "L4", en: "dangerous", jp: "危険な" },
+  { lesson: "L4", en: "money", jp: "お金" },
+  { lesson: "L4", en: "zip-lining", jp: "ジップライン" },
+  { lesson: "L4", en: "balloon", jp: "風船" },
+  { lesson: "L4", en: "cookie", jp: "クッキー" },
+  { lesson: "L4", en: "cupcake", jp: "カップケーキ" },
+
+  // --- Lesson 5 (50語) ---
+  { lesson: "L5", en: "Uluru", jp: "ウルル" },
+  { lesson: "L5", en: "rock", jp: "岩" },
+  { lesson: "L5", en: "organize", jp: "〜を主催する" },
+  { lesson: "L5", en: "sound", jp: "〜のように聞こえる" },
+  { lesson: "L5", en: "sign up", jp: "登録する、申し込む" },
+  { lesson: "L5", en: "send", jp: "〜を送る" },
+  { lesson: "L5", en: "link", jp: "リンク" },
+  { lesson: "L5", en: "website", jp: "ウェブサイト" },
+  { lesson: "L5", en: "check out", jp: "〜を調べる、確認する" },
+  { lesson: "L5", en: "guidebook", jp: "ガイドブック" },
+  { lesson: "L5", en: "call", jp: "〜を…と呼ぶ" },
+  { lesson: "L5", en: "state", jp: "州" },
+  { lesson: "L5", en: "golden", jp: "金色の" },
+  { lesson: "L5", en: "ticket", jp: "チケット、切符" },
+  { lesson: "L5", en: "sunrise", jp: "日の出" },
+  { lesson: "L5", en: "sunset", jp: "日没、夕焼け" },
+  { lesson: "L5", en: "sacred", jp: "神聖な" },
+  { lesson: "L5", en: "native", jp: "先住の、固有の" },
+  { lesson: "L5", en: "ancestor", jp: "先祖、祖先" },
+  { lesson: "L5", en: "British", jp: "イギリスの" },
+  { lesson: "L5", en: "explorer", jp: "探検家" },
+  { lesson: "L5", en: "hurt", jp: "〜を傷つける" },
+  { lesson: "L5", en: "respect", jp: "〜を尊重する" },
+  { lesson: "L5", en: "tradition", jp: "伝統" },
+  { lesson: "L5", en: "Anangu", jp: "アナング族" },
+  { lesson: "L5", en: "Ayers Rock", jp: "エアーズ・ロック" },
+  { lesson: "L5", en: "studio", jp: "アトリエ、スタジオ" },
+  { lesson: "L5", en: "artwork", jp: "芸術作品" },
+  { lesson: "L5", en: "paint", jp: "絵の具でかく" },
+  { lesson: "L5", en: "hit", jp: "〜を打つ" },
+  { lesson: "L5", en: "home run", jp: "ホームラン" },
+  { lesson: "L5", en: "spell", jp: "（文字を）つづる" },
+  { lesson: "L5", en: "code", jp: "コード、暗号" },
+  { lesson: "L5", en: "fortune", jp: "幸運、富" },
+  { lesson: "L5", en: "history", jp: "歴史" },
+  { lesson: "L5", en: "taste", jp: "〜を味わう" },
+  { lesson: "L5", en: "attractive", jp: "魅力的な" },
+  { lesson: "L5", en: "relaxing", jp: "くつろげる" },
+  { lesson: "L5", en: "symbol", jp: "象徴、シンボル" },
+  { lesson: "L5", en: "fantastic", jp: "すばらしい" },
+  { lesson: "L5", en: "market", jp: "市場、マーケット" },
+  { lesson: "L5", en: "spot", jp: "場所、地点" },
+  { lesson: "L5", en: "gather", jp: "集まる" },
+  { lesson: "L5", en: "culture", jp: "文化" },
+  { lesson: "L5", en: "theme park", jp: "テーマパーク" },
+  { lesson: "L5", en: "World Heritage Site", jp: "世界遺産" },
+  { lesson: "L5", en: "craft", jp: "工芸品" },
+  { lesson: "L5", en: "live", jp: "生の、ライブの" },
+  { lesson: "L5", en: "Could you ...?", jp: "〜していただけませんか" },
+  { lesson: "L5", en: "line", jp: "路線、線" },
+
+  // --- Lesson 6 (26語) ---
+  { lesson: "L6", en: "Southeast Asia", jp: "東南アジア" },
+  { lesson: "L6", en: "prefecture", jp: "県、府" },
+  { lesson: "L6", en: "port", jp: "港" },
+  { lesson: "L6", en: "ship", jp: "船" },
+  { lesson: "L6", en: "various", jp: "さまざまな" },
+  { lesson: "L6", en: "official", jp: "公式の、公用の" },
+  { lesson: "L6", en: "such", jp: "そのような" },
+  { lesson: "L6", en: "such as ...", jp: "〜のような" },
+  { lesson: "L6", en: "same", jp: "同じ" },
+  { lesson: "L6", en: "food court", jp: "フードコート" },
+  { lesson: "L6", en: "Malay", jp: "マレー語" },
+  { lesson: "L6", en: "Tamil", jp: "タミル語" },
+  { lesson: "L6", en: "sightseeing", jp: "観光" },
+  { lesson: "L6", en: "most", jp: "最も〜" },
+  { lesson: "L6", en: "list", jp: "リスト、一覧表" },
+  { lesson: "L6", en: "sandal", jp: "サンダル" },
+  { lesson: "L6", en: "sunscreen", jp: "日焼け止め" },
+  { lesson: "L6", en: "swimsuit", jp: "水着" },
+  { lesson: "L6", en: "without", jp: "〜なしで" },
+  { lesson: "L6", en: "cultural", jp: "文化の、文化的な" },
+  { lesson: "L6", en: "would like to ...", jp: "〜したいと思う" },
+  { lesson: "L6", en: "party", jp: "パーティー" },
+  { lesson: "L6", en: "answer", jp: "答え、返事" },
+  { lesson: "L6", en: "us", jp: "私たちを（に）" },
+  { lesson: "L6", en: "something else", jp: "何かほかのもの" },
+  { lesson: "L6", en: "origami", jp: "折り紙" }
+];
+
+// ==========================================
+// 音声・効果音
+// ==========================================
+let audioCtx = null;
+function playSfx(type) {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    const now = audioCtx.currentTime;
+
+    if (type === 'pick') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(520, now);
+      osc.frequency.setValueAtTime(680, now + 0.06);
+      gain.gain.setValueAtTime(0.12, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+      osc.start(now);
+      osc.stop(now + 0.16);
+    } else if (type === 'match') {
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(587, now);
+      osc.frequency.setValueAtTime(784, now + 0.08);
+      osc.frequency.setValueAtTime(1046, now + 0.16);
+      gain.gain.setValueAtTime(0.16, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.34);
+      osc.start(now);
+      osc.stop(now + 0.34);
+    } else if (type === 'heal') {
+      osc.type = 'sine';
+      [523, 659, 784, 1046, 1318].forEach((f, idx) => {
+        osc.frequency.setValueAtTime(f, now + idx * 0.07);
+      });
+      gain.gain.setValueAtTime(0.18, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+      osc.start(now);
+      osc.stop(now + 0.45);
+    } else if (type === 'boss') {
+      osc.type = 'sawtooth';
+      [220, 196, 261, 330, 440].forEach((f, idx) => {
+        osc.frequency.setValueAtTime(f, now + idx * 0.08);
+      });
+      gain.gain.setValueAtTime(0.18, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+      osc.start(now);
+      osc.stop(now + 0.5);
+    } else if (type === 'damage') {
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(160, now);
+      osc.frequency.exponentialRampToValueAtTime(65, now + 0.35);
+      gain.gain.setValueAtTime(0.18, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+      osc.start(now);
+      osc.stop(now + 0.35);
+    }
+  } catch (e) {}
+}
+
+function speakWord(text) {
+  try {
+    window.speechSynthesis.cancel();
+    const clean = text.replace(/\.\.\./g, '').replace(/\//g, ' ').trim();
+    const u = new SpeechSynthesisUtterance(clean);
+    u.lang = 'en-US';
+    u.rate = 0.95;
+    window.speechSynthesis.speak(u);
+  } catch (e) {}
+}
+
+// ==========================================
+// ゲーム状態管理
+// ==========================================
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const MAX_LIFE = 3;
+const VISIBLE_PAIR_COUNT = 8; // 一度に表示する単語ペア数（英単語8個＋日本語8個）
+
+let selectedLesson = 'test50';
+let ghostBaseSpeed = 1.15;
+
+function selectLesson(val, btn) {
+  selectedLesson = val;
+  document.querySelectorAll('#lessonGroup .opt-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function selectGhostSpeed(val, btn) {
+  ghostBaseSpeed = val;
+  document.querySelectorAll('#speedGroup .opt-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+let gameState = 'menu';
+let animId = null;
+let lastFrameTime = 0;
+
+let life = MAX_LIFE;
+let score = 0;
+let clearedCount = 0;
+let totalTarget = 50;
+let remainingPool = [];
+let activePairs = [];
+let tiles = [];
+let selectedEnId = null;
+let missedWords = [];
+let isLastFiveBoost = false;
+
+let bannerText = '';
+let bannerColor = '#fde047';
+let bannerTimer = 0;
+let particles = [];
+
+const poodle = {
+  x: 400,
+  y: 270,
+  r: 18,
+  speed: 245,
+  dirX: 1,
+  walkPhase: 0,
+  invulnTimer: 0,
+  targetX: null,
+  targetY: null
+};
+
+let ghosts = [];
+let bossGhost = null;
+
+const keys = {};
+window.addEventListener('keydown', e => {
+  keys[e.key.toLowerCase()] = true;
+  if (['arrowup','arrowdown','arrowleft','arrowright',' '].includes(e.key.toLowerCase())) {
+    if (gameState === 'playing') e.preventDefault();
+  }
+});
+window.addEventListener('keyup', e => {
+  keys[e.key.toLowerCase()] = false;
+});
+
+let pointerActive = false;
+function setPointerTarget(clientX, clientY) {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  poodle.targetX = Math.max(24, Math.min(canvas.width - 24, (clientX - rect.left) * scaleX));
+  poodle.targetY = Math.max(24, Math.min(canvas.height - 24, (clientY - rect.top) * scaleY));
+}
+
+canvas.addEventListener('pointerdown', e => {
+  if (gameState !== 'playing') return;
+  pointerActive = true;
+  setPointerTarget(e.clientX, e.clientY);
+});
+canvas.addEventListener('pointermove', e => {
+  if (!pointerActive || gameState !== 'playing') return;
+  setPointerTarget(e.clientX, e.clientY);
+});
+window.addEventListener('pointerup', () => {
+  pointerActive = false;
+});
+
+function showBanner(text, color = '#fde047', duration = 1.3) {
+  bannerText = text;
+  bannerColor = color;
+  bannerTimer = duration;
+}
+
+function showStartScreen() {
+  gameState = 'menu';
+  if (animId) cancelAnimationFrame(animId);
+  bossGhost = null;
+  canvas.classList.remove('last-five');
+  document.getElementById('endOverlay').classList.add('hidden');
+  document.getElementById('startOverlay').classList.remove('hidden');
+}
+
+function shuffleArray(arr) {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+function resetPositionsToStart() {
+  poodle.x = canvas.width / 2;
+  poodle.y = canvas.height / 2;
+  poodle.dirX = 1;
+  poodle.targetX = null;
+  poodle.targetY = null;
+  pointerActive = false;
+
+  if (ghosts.length >= 3) {
+    ghosts[0].x = 60;
+    ghosts[0].y = 60;
+    ghosts[1].x = canvas.width - 60;
+    ghosts[1].y = 60;
+    ghosts[2].x = 60;
+    ghosts[2].y = canvas.height - 60;
+  }
+
+  if (bossGhost) {
+    bossGhost.x = canvas.width - 55;
+    bossGhost.y = canvas.height - 55;
+  }
+}
+
+function startGame() {
+  document.getElementById('startOverlay').classList.add('hidden');
+  document.getElementById('endOverlay').classList.add('hidden');
+  canvas.classList.remove('last-five');
+
+  let pool;
+  if (selectedLesson === 'test50') {
+    const l4 = shuffleArray(WORD_DATA.filter(w => w.lesson === 'L4')).slice(0, 20);
+    const l5 = shuffleArray(WORD_DATA.filter(w => w.lesson === 'L5')).slice(0, 18);
+    const l6 = shuffleArray(WORD_DATA.filter(w => w.lesson === 'L6')).slice(0, 12);
+    pool = shuffleArray([...l4, ...l5, ...l6]);
+  } else if (selectedLesson === 'random25') {
+    pool = shuffleArray(WORD_DATA).slice(0, 25);
+  } else if (selectedLesson === 'all154') {
+    pool = shuffleArray(WORD_DATA);
+  } else {
+    pool = shuffleArray(WORD_DATA.filter(w => w.lesson === selectedLesson));
+  }
+
+  totalTarget = pool.length;
+  clearedCount = 0;
+  score = 0;
+  life = MAX_LIFE;
+  selectedEnId = null;
+  missedWords = [];
+  particles = [];
+  bannerTimer = 0;
+  isLastFiveBoost = false;
+  bossGhost = null;
+
+  const indexedPool = pool.map((item, idx) => ({
+    id: idx + 1,
+    en: item.en,
+    jp: item.jp
+  }));
+
+  activePairs = indexedPool.slice(0, VISIBLE_PAIR_COUNT);
+  remainingPool = indexedPool.slice(VISIBLE_PAIR_COUNT);
+
+  ghosts = [
+    { x: 60, y: 60, r: 17, speed: ghostBaseSpeed * 68, color: '#f8fafc', eyeColor: '#ef4444', type: 'chase', phase: 0 },
+    { x: canvas.width - 60, y: 60, r: 17, speed: ghostBaseSpeed * 62, color: '#c084fc', eyeColor: '#fef08a', type: 'intercept', phase: 2 },
+    { x: 60, y: canvas.height - 60, r: 17, speed: ghostBaseSpeed * 58, color: '#38bdf8', eyeColor: '#1e1b4b', type: 'wave', phase: 4 }
+  ];
+
+  resetPositionsToStart();
+  poodle.invulnTimer = 1.5;
+
+  layoutAndShuffleTiles(false);
+  updateHud();
+  updateHoldingBar();
+
+  gameState = 'playing';
+  lastFrameTime = performance.now();
+  animId = requestAnimationFrame(gameLoop);
+}
+
+function spawnBossGhost() {
+  const corners = [
+    { x: 55, y: 55 },
+    { x: canvas.width - 55, y: 55 },
+    { x: 55, y: canvas.height - 55 },
+    { x: canvas.width - 55, y: canvas.height - 55 }
+  ];
+  let bestCorner = corners[3];
+  let maxDist = -1;
+  corners.forEach(c => {
+    const d = Math.hypot(c.x - poodle.x, c.y - poodle.y);
+    if (d > maxDist) {
+      maxDist = d;
+      bestCorner = c;
+    }
+  });
+
+  bossGhost = {
+    x: bestCorner.x,
+    y: bestCorner.y,
+    r: 27,
+    speed: ghostBaseSpeed * 74,
+    phase: 0
+  };
+  spawnParticles(bossGhost.x, bossGhost.y, '#ef4444', 28);
+}
+
+function layoutAndShuffleTiles(announce = true) {
+  const cols = 4;
+  const rows = 4;
+  const marginX = 48;
+  const marginY = 38;
+  const cellW = (canvas.width - marginX * 2) / cols;
+  const cellH = (canvas.height - marginY * 2) / rows;
+
+  const slots = [];
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      slots.push({
+        cx: marginX + cellW * (c + 0.5) + (Math.random() - 0.5) * 22,
+        cy: marginY + cellH * (r + 0.5) + (Math.random() - 0.5) * 16
+      });
+    }
+  }
+  const shuffledSlots = shuffleArray(slots);
+
+  const items = [];
+  activePairs.forEach(p => {
+    items.push({ pairId: p.id, kind: 'en', text: p.en });
+    items.push({ pairId: p.id, kind: 'jp', text: p.jp });
+  });
+  const shuffledItems = shuffleArray(items);
+
+  tiles = shuffledItems.map((item, i) => {
+    const slot = shuffledSlots[i];
+    ctx.font = 'bold 14px sans-serif';
+    const textW = ctx.measureText(item.text).width;
+    const w = Math.max(84, Math.min(156, textW + 24));
+    const h = 36;
+    return {
+      ...item,
+      x: slot.cx,
+      y: slot.cy,
+      w: w,
+      h: h,
+      cooldown: 0
+    };
+  });
+
+  if (announce && bannerTimer <= 0.2) {
+    showBanner('🔀 新しい単語が追加＆シャッフル！', '#fde047', 1.1);
+  }
+}
+
+function updateHud() {
+  document.getElementById('hud-life').textContent =
+    '❤️'.repeat(Math.max(0, life)) + '🖤'.repeat(Math.max(0, MAX_LIFE - life));
+  document.getElementById('hud-heal').textContent = `${clearedCount % 5} / 5`;
+  document.getElementById('hud-cleared').textContent = clearedCount;
+  document.getElementById('hud-total').textContent = totalTarget;
+  document.getElementById('hud-score').textContent = score;
+}
+
+function updateHoldingBar() {
+  const el = document.getElementById('holding-word');
+  if (!selectedEnId) {
+    el.textContent = '（まだ持っていません — 青い英単語に触れよう！）';
+    el.style.color = '#94a3b8';
+  } else {
+    const pair = activePairs.find(p => p.id === selectedEnId);
+    if (pair) {
+      el.textContent = `【 ${pair.en} 】 → 合う日本語を探そう！`;
+      el.style.color = '#fde047';
+    }
+  }
+}
+
+function spawnParticles(x, y, color, count = 14) {
+  for (let i = 0; i < count; i++) {
+    const ang = (Math.PI * 2 * i) / count + Math.random() * 0.4;
+    const spd = 60 + Math.random() * 140;
+    particles.push({
+      x, y,
+      vx: Math.cos(ang) * spd,
+      vy: Math.sin(ang) * spd,
+      life: 0.55,
+      color
+    });
+  }
+}
+
+function handleGhostHit(isBoss = false) {
+  playSfx('damage');
+  life--;
+  updateHud();
+
+  spawnParticles(poodle.x, poodle.y, '#ef4444', 22);
+
+  if (life <= 0) {
+    endGame(false);
+    return;
+  }
+
+  selectedEnId = null;
+  updateHoldingBar();
+  resetPositionsToStart();
+  poodle.invulnTimer = 2.0;
+  spawnParticles(poodle.x, poodle.y, '#fde047', 16);
+  layoutAndShuffleTiles(false);
+
+  const label = isBoss ? '👑 ボスお化け' : '👻 お化け';
+  showBanner(`${label}にやられた！スタート位置へ戻り単語をシャッフル！`, '#fca5a5', 1.8);
+}
+
+// ==========================================
+// メインループ
+// ==========================================
+function gameLoop(now) {
+  if (gameState !== 'playing') return;
+  const dt = Math.min(0.05, (now - lastFrameTime) / 1000);
+  lastFrameTime = now;
+
+  update(dt);
+  draw();
+
+  animId = requestAnimationFrame(gameLoop);
+}
+
+function update(dt) {
+  if (poodle.invulnTimer > 0) poodle.invulnTimer -= dt;
+  if (bannerTimer > 0) bannerTimer -= dt;
+
+  tiles.forEach(t => {
+    if (t.cooldown > 0) t.cooldown -= dt;
+  });
+
+  // 1. トイプードル移動
+  let vx = 0;
+  let vy = 0;
+  if (keys['arrowleft'] || keys['a']) vx -= 1;
+  if (keys['arrowright'] || keys['d']) vx += 1;
+  if (keys['arrowup'] || keys['w']) vy -= 1;
+  if (keys['arrowdown'] || keys['s']) vy += 1;
+
+  if (vx !== 0 || vy !== 0) {
+    poodle.targetX = null;
+    poodle.targetY = null;
+    const len = Math.hypot(vx, vy);
+    vx = (vx / len) * poodle.speed;
+    vy = (vy / len) * poodle.speed;
+    poodle.x += vx * dt;
+    poodle.y += vy * dt;
+    if (vx !== 0) poodle.dirX = vx > 0 ? 1 : -1;
+    poodle.walkPhase += dt * 14;
+  } else if (poodle.targetX !== null && poodle.targetY !== null) {
+    const dx = poodle.targetX - poodle.x;
+    const dy = poodle.targetY - poodle.y;
+    const dist = Math.hypot(dx, dy);
+    if (dist > 5) {
+      poodle.x += (dx / dist) * poodle.speed * dt;
+      poodle.y += (dy / dist) * poodle.speed * dt;
+      if (Math.abs(dx) > 2) poodle.dirX = dx > 0 ? 1 : -1;
+      poodle.walkPhase += dt * 14;
+    } else {
+      poodle.targetX = null;
+      poodle.targetY = null;
+    }
+  }
+
+  poodle.x = Math.max(22, Math.min(canvas.width - 22, poodle.x));
+  poodle.y = Math.max(22, Math.min(canvas.height - 22, poodle.y));
+
+  // 2. タイルとの当たり判定
+  for (let i = 0; i < tiles.length; i++) {
+    const t = tiles[i];
+    if (t.cooldown > 0) continue;
+
+    const closestX = Math.max(t.x - t.w / 2, Math.min(poodle.x, t.x + t.w / 2));
+    const closestY = Math.max(t.y - t.h / 2, Math.min(poodle.y, t.y + t.h / 2));
+    const dist = Math.hypot(poodle.x - closestX, poodle.y - closestY);
+
+    if (dist < poodle.r - 2) {
+      handleTileTouch(t);
+      break;
+    }
+  }
+
+  // 3. お化け3体の追跡AI
+  const speedMult = isLastFiveBoost ? 1.22 : 1.0;
+
+  for (let idx = 0; idx < ghosts.length; idx++) {
+    const g = ghosts[idx];
+    g.phase += dt * (isLastFiveBoost ? 5.5 : 4);
+    let tx = poodle.x;
+    let ty = poodle.y;
+
+    if (g.type === 'intercept') {
+      tx += poodle.dirX * 45;
+    } else if (g.type === 'wave') {
+      tx += Math.cos(g.phase) * 55;
+      ty += Math.sin(g.phase) * 55;
+    }
+
+    const dx = tx - g.x;
+    const dy = ty - g.y;
+    const dist = Math.hypot(dx, dy);
+    if (dist > 1) {
+      g.x += (dx / dist) * g.speed * speedMult * dt;
+      g.y += (dy / dist) * g.speed * speedMult * dt;
+    }
+
+    ghosts.forEach((other, oIdx) => {
+      if (idx === oIdx) return;
+      const odx = g.x - other.x;
+      const ody = g.y - other.y;
+      const odist = Math.hypot(odx, ody);
+      if (odist > 0 && odist < 46) {
+        g.x += (odx / odist) * 40 * dt;
+        g.y += (ody / odist) * 40 * dt;
+      }
+    });
+
+    const hitDist = Math.hypot(poodle.x - g.x, poodle.y - g.y);
+    if (hitDist < poodle.r + g.r - 5 && poodle.invulnTimer <= 0) {
+      handleGhostHit(false);
+      return;
+    }
+  }
+
+  // 4. ボスお化けの追跡AI
+  if (bossGhost) {
+    bossGhost.phase += dt * 5;
+    const tx = poodle.x + poodle.dirX * 25;
+    const ty = poodle.y;
+    const dx = tx - bossGhost.x;
+    const dy = ty - bossGhost.y;
+    const dist = Math.hypot(dx, dy);
+
+    if (dist > 1) {
+      bossGhost.x += (dx / dist) * bossGhost.speed * 1.15 * dt;
+      bossGhost.y += (dy / dist) * bossGhost.speed * 1.15 * dt;
+    }
+
+    const hitDist = Math.hypot(poodle.x - bossGhost.x, poodle.y - bossGhost.y);
+    if (hitDist < poodle.r + bossGhost.r - 6 && poodle.invulnTimer <= 0) {
+      handleGhostHit(true);
+      return;
+    }
+  }
+
+  // 5. パーティクル更新
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+    p.life -= dt;
+    if (p.life <= 0) particles.splice(i, 1);
+  }
+}
+
+function handleTileTouch(tile) {
+  if (tile.kind === 'en') {
+    // 英単語に触れた場合：別の英単語に連続で触れてもライフは減らず、選ぶ日本語が切り替わるだけ
+    if (selectedEnId !== tile.pairId) {
+      selectedEnId = tile.pairId;
+      playSfx('pick');
+      speakWord(tile.text);
+      spawnParticles(tile.x, tile.y, '#38bdf8', 10);
+      updateHoldingBar();
+    }
+    tile.cooldown = 0.45;
+  } else if (tile.kind === 'jp') {
+    // 英単語を持っていない状態で日本語に触れた場合は何もしない
+    if (!selectedEnId) {
+      tile.cooldown = 0.4;
+      return;
+    }
+
+    if (tile.pairId === selectedEnId) {
+      // 正解！
+      score += 100;
+      clearedCount++;
+      spawnParticles(tile.x, tile.y, '#fde047', 22);
+
+      const remainingCount = totalTarget - clearedCount;
+
+      if (remainingCount === 5 && !isLastFiveBoost) {
+        isLastFiveBoost = true;
+        canvas.classList.add('last-five');
+        spawnBossGhost();
+
+        if (clearedCount % 5 === 0 && life < MAX_LIFE) {
+          life++;
+          spawnParticles(poodle.x, poodle.y, '#f472b6', 26);
+          playSfx('boss');
+          showBanner('💖 ライフ1復活！＆ 👑ラスト5問！ボスお化け出現！', '#fb923c', 2.2);
+        } else {
+          if (clearedCount % 5 === 0) score += 200;
+          playSfx('boss');
+          showBanner('👑 ラスト5問！ボスお化け出現＆スピードアップ！', '#fb923c', 2.1);
+        }
+      } else if (clearedCount % 5 === 0) {
+        if (life < MAX_LIFE) {
+          life++;
+          playSfx('heal');
+          spawnParticles(poodle.x, poodle.y, '#f472b6', 26);
+          showBanner('💖 5個正解ボーナス！ライフ1復活！', '#f472b6', 1.6);
+        } else {
+          playSfx('heal');
+          score += 200;
+          showBanner('✨ 5個正解＆ライフ満タンボーナス +200点！', '#4ade80', 1.5);
+        }
+      } else {
+        playSfx('match');
+        showBanner('🔀 新しい単語が追加＆シャッフル！', '#fde047', 1.1);
+      }
+
+      activePairs = activePairs.filter(p => p.id !== selectedEnId);
+      if (remainingPool.length > 0) {
+        activePairs.push(remainingPool.shift());
+      }
+      selectedEnId = null;
+      updateHud();
+      updateHoldingBar();
+
+      if (activePairs.length === 0) {
+        endGame(true);
+        return;
+      }
+
+      poodle.invulnTimer = Math.max(poodle.invulnTimer, 0.9);
+      layoutAndShuffleTiles(false);
+    } else {
+      // 間違った日本語に触れたらライフが1つ減る！
+      playSfx('damage');
+      life--;
+      const curPair = activePairs.find(p => p.id === selectedEnId);
+      if (curPair && !missedWords.some(m => m.en === curPair.en)) {
+        missedWords.push(curPair);
+      }
+      spawnParticles(tile.x, tile.y, '#ef4444', 18);
+      showBanner(`❌ 違う日本語に触れた！ライフ -1（正解は「${curPair ? curPair.jp : ''}」）`, '#fca5a5', 1.5);
+
+      selectedEnId = null;
+      tile.cooldown = 1.0;
+      updateHud();
+      updateHoldingBar();
+
+      if (life <= 0) {
+        endGame(false);
+        return;
+      }
+    }
+  }
+}
+
+function endGame(isWin) {
+  gameState = 'ended';
+  if (animId) cancelAnimationFrame(animId);
+  bossGhost = null;
+  canvas.classList.remove('last-five');
+
+  const endOv = document.getElementById('endOverlay');
+  const title = document.getElementById('endTitle');
+  const msg = document.getElementById('endMsg');
+  const missBox = document.getElementById('miss-box');
+
+  if (isWin) {
+    title.textContent = '🎉 完全クリア！おめでとう！';
+    title.style.color = '#fde047';
+    msg.innerHTML = `重複なし全 ${totalTarget} 問のマッチングに成功しました！<br>最終スコア：<b>${score} 点</b>`;
+  } else {
+    title.textContent = '💔 ライフが0になった…！';
+    title.style.color = '#fca5a5';
+    msg.innerHTML = `クリア数：${clearedCount} / ${totalTarget} 問（スコア：${score} 点）<br>もう1回チャレンジしよう！`;
+  }
+
+  if (missedWords.length > 0) {
+    missBox.classList.remove('hidden');
+    missBox.innerHTML = '<b>📌 間違えた単語を復習しよう：</b><ul style="margin:6px 0 0; padding-left:20px;">' +
+      missedWords.map(m => `<li><b>${m.en}</b>：${m.jp}</li>`).join('') + '</ul>';
+  } else {
+    missBox.classList.add('hidden');
+  }
+
+  endOv.classList.remove('hidden');
+}
+
+// ==========================================
+// 描画処理
+// ==========================================
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = '#166534';
+  for (let y = 0; y < canvas.height; y += 60) {
+    ctx.fillRect(0, y, canvas.width, 30);
+  }
+
+  if (isLastFiveBoost) {
+    ctx.save();
+    ctx.fillStyle = 'rgba(254, 202, 202, 0.35)';
+    ctx.font = 'bold 13px sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText('👑 BOSS & LAST 5 SPURT!', canvas.width - 14, canvas.height - 10);
+    ctx.restore();
+  }
+
+  if (poodle.targetX !== null && poodle.targetY !== null) {
+    ctx.strokeStyle = 'rgba(253, 224, 71, 0.55)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(poodle.targetX, poodle.targetY, 10, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  tiles.forEach(t => {
+    const left = t.x - t.w / 2;
+    const top = t.y - t.h / 2;
+    const isSelected = (t.kind === 'en' && t.pairId === selectedEnId);
+
+    ctx.save();
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    roundRect(ctx, left + 2, top + 4, t.w, t.h, 10, true, false);
+
+    if (isSelected) {
+      ctx.fillStyle = '#fde047';
+      ctx.strokeStyle = '#ca8a04';
+    } else if (t.kind === 'en') {
+      ctx.fillStyle = '#dbeafe';
+      ctx.strokeStyle = '#2563eb';
+    } else {
+      ctx.fillStyle = '#ffedd5';
+      ctx.strokeStyle = '#ea580c';
+    }
+    ctx.lineWidth = isSelected ? 3 : 2;
+    roundRect(ctx, left, top, t.w, t.h, 10, true, true);
+
+    ctx.fillStyle = isSelected ? '#1e293b' : (t.kind === 'en' ? '#1e3a8a' : '#7c2d12');
+    ctx.font = 'bold 14px "UD デジタル 教科書体 NK-R", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(t.text, t.x, t.y + 1, t.w - 12);
+    ctx.restore();
+  });
+
+  drawBlackToyPoodle(poodle);
+  ghosts.forEach(g => drawGhost(g));
+  if (bossGhost) drawBossGhost(bossGhost);
+
+  particles.forEach(p => {
+    ctx.globalAlpha = Math.max(0, p.life * 1.8);
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  });
+
+  if (bannerTimer > 0 && bannerText) {
+    ctx.save();
+    ctx.globalAlpha = Math.min(1, bannerTimer * 1.5);
+    ctx.font = 'bold 14px sans-serif';
+    const bw = Math.min(canvas.width - 30, Math.max(280, ctx.measureText(bannerText).width + 36));
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+    roundRect(ctx, canvas.width / 2 - bw / 2, 12, bw, 34, 999, true, false);
+    ctx.fillStyle = bannerColor;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(bannerText, canvas.width / 2, 29, bw - 20);
+    ctx.restore();
+  }
+}
+
+// 黒のトイプードル描画
+function drawBlackToyPoodle(p) {
+  ctx.save();
+  if (p.invulnTimer > 0 && Math.floor(p.invulnTimer * 12) % 2 === 0) {
+    ctx.globalAlpha = 0.45;
+  }
+
+  const bob = Math.sin(p.walkPhase) * 2.5;
+  ctx.translate(p.x, p.y + bob);
+
+  if (selectedEnId) {
+    const pair = activePairs.find(item => item.id === selectedEnId);
+    if (pair) {
+      ctx.font = 'bold 12px sans-serif';
+      const tw = ctx.measureText(pair.en).width + 16;
+      ctx.fillStyle = '#fef08a';
+      ctx.strokeStyle = '#ca8a04';
+      ctx.lineWidth = 2;
+      roundRect(ctx, -tw / 2, -44, tw, 22, 8, true, true);
+      ctx.fillStyle = '#1e293b';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(pair.en, 0, -33);
+    }
+  }
+
+  ctx.scale(p.dirX, 1);
+
+  // モコモコの黒い体
+  ctx.fillStyle = '#1e293b';
+  ctx.strokeStyle = '#64748b';
+  ctx.lineWidth = 1.8;
+  ctx.beginPath();
+  ctx.ellipse(-2, 4, 14, 11, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  // ポンポン尻尾
+  ctx.beginPath();
+  ctx.arc(-16, 0, 5.5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  // 足（トコトコ動く）
+  const legSwing = Math.sin(p.walkPhase) * 4;
+  ctx.fillStyle = '#0f172a';
+  ctx.fillRect(-10 + legSwing, 12, 5, 7);
+  ctx.fillRect(4 - legSwing, 12, 5, 7);
+
+  // 赤い首輪と金の鈴
+  ctx.fillStyle = '#ef4444';
+  ctx.fillRect(3, -4, 6, 10);
+  ctx.fillStyle = '#facc15';
+  ctx.beginPath();
+  ctx.arc(8, 5, 2.3, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 黒い頭（ふわふわ）
+  ctx.fillStyle = '#1e293b';
+  ctx.strokeStyle = '#64748b';
+  ctx.beginPath();
+  ctx.arc(9, -6, 11, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  // 頭頂部のアフロ毛
+  ctx.beginPath();
+  ctx.arc(8, -16, 6, 0, Math.PI * 2);
+  ctx.arc(13, -15, 5, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 垂れ耳（より濃い黒＋グレー縁取り）
+  ctx.fillStyle = '#0f172a';
+  ctx.strokeStyle = '#64748b';
+  ctx.beginPath();
+  ctx.ellipse(2, -4, 5, 9, 0.2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  // つぶらな目（黒い顔でも映える白目＋黒瞳）
+  ctx.fillStyle = '#f8fafc';
+  ctx.beginPath();
+  ctx.arc(14, -7, 2.6, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#020617';
+  ctx.beginPath();
+  ctx.arc(14.7, -7, 1.5, 0, Math.PI * 2);
+  ctx.fill();
+
+  // ツヤのある黒い鼻
+  ctx.fillStyle = '#020617';
+  ctx.beginPath();
+  ctx.arc(20, -4, 2.6, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#cbd5e1';
+  ctx.beginPath();
+  ctx.arc(19.5, -4.8, 0.9, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.restore();
+}
+
+function drawGhost(g) {
+  ctx.save();
+  const floatY = Math.sin(g.phase) * 3;
+  ctx.translate(g.x, g.y + floatY);
+
+  if (isLastFiveBoost) {
+    ctx.shadowColor = '#fb923c';
+    ctx.shadowBlur = 12;
+  }
+
+  ctx.globalAlpha = 0.88;
+  ctx.fillStyle = g.color;
+  ctx.strokeStyle = isLastFiveBoost ? '#ea580c' : '#334155';
+  ctx.lineWidth = isLastFiveBoost ? 2.5 : 2;
+
+  ctx.beginPath();
+  ctx.arc(0, -4, g.r, Math.PI, 0, false);
+  ctx.lineTo(g.r, 14);
+  ctx.lineTo(g.r * 0.5, 9);
+  ctx.lineTo(0, 14);
+  ctx.lineTo(-g.r * 0.5, 9);
+  ctx.lineTo(-g.r, 14);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.shadowBlur = 0;
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = isLastFiveBoost ? '#dc2626' : g.eyeColor;
+  ctx.beginPath();
+  ctx.arc(-5, -5, 3, 0, Math.PI * 2);
+  ctx.arc(5, -5, 3, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = '#1e293b';
+  ctx.beginPath();
+  ctx.arc(0, 3, 3.5, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.restore();
+}
+
+function drawBossGhost(b) {
+  ctx.save();
+  const floatY = Math.sin(b.phase) * 4;
+  ctx.translate(b.x, b.y + floatY);
+
+  ctx.shadowColor = '#ef4444';
+  ctx.shadowBlur = 18;
+
+  ctx.globalAlpha = 0.94;
+  ctx.fillStyle = '#3b0764';
+  ctx.strokeStyle = '#ef4444';
+  ctx.lineWidth = 3;
+
+  const r = b.r;
+  ctx.beginPath();
+  ctx.arc(0, -5, r, Math.PI, 0, false);
+  ctx.lineTo(r, 22);
+  ctx.lineTo(r * 0.6, 14);
+  ctx.lineTo(r * 0.2, 22);
+  ctx.lineTo(-r * 0.2, 14);
+  ctx.lineTo(-r * 0.6, 22);
+  ctx.lineTo(-r, 14);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.shadowBlur = 0;
+  ctx.globalAlpha = 1;
+
+  ctx.fillStyle = '#facc15';
+  ctx.strokeStyle = '#a16207';
+  ctx.lineWidth = 1.8;
+  ctx.beginPath();
+  ctx.moveTo(-14, -r - 2);
+  ctx.lineTo(-16, -r - 16);
+  ctx.lineTo(-7, -r - 9);
+  ctx.lineTo(0, -r - 19);
+  ctx.lineTo(7, -r - 9);
+  ctx.lineTo(16, -r - 16);
+  ctx.lineTo(14, -r - 2);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = '#fef08a';
+  ctx.beginPath();
+  ctx.arc(-8, -6, 4.8, 0, Math.PI * 2);
+  ctx.arc(8, -6, 4.8, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = '#dc2626';
+  ctx.beginPath();
+  ctx.arc(-8, -6, 2.5, 0, Math.PI * 2);
+  ctx.arc(8, -6, 2.5, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.strokeStyle = '#fca5a5';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(-14, -13);
+  ctx.lineTo(-4, -9);
+  ctx.moveTo(14, -13);
+  ctx.lineTo(4, -9);
+  ctx.stroke();
+
+  ctx.fillStyle = '#ef4444';
+  ctx.beginPath();
+  ctx.ellipse(0, 7, 9, 5.5, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.restore();
+}
+
+function roundRect(ctx, x, y, w, h, r, fill, stroke) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+  if (fill) ctx.fill();
+  if (stroke) ctx.stroke();
+}
+</script>
+</body>
+</html>
